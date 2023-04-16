@@ -33,7 +33,7 @@ export const ActiveRollOverlay: React.FC<Props> = (props) => {
               { type: "absent", count: counts.absent },
             ]}
           />
-          <div style={{ marginTop: Spacing.u6 }}>
+          <div style={{ marginTop: Spacing.u1, textAlign: "right" }}>
             <Button color="inherit" onClick={exitRollMode}>
               Exit
             </Button>

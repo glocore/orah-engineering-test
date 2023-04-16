@@ -10,6 +10,7 @@ type State = {
   searchTerm: string
   isRollMode: boolean
   rollStates: Map<number, RolllStateType>
+  rollStateFilter: RolllStateType | null
 }
 
 type Action = {
@@ -21,6 +22,7 @@ type Action = {
   setInitialRollStates: (studentIds: number[]) => void
   updateRollStateFor: (studentId: number, rollState: RolllStateType) => void
   resetRollStates: () => void
+  setRollStateFilter: (rollState: RolllStateType | null) => void
 }
 
 export const useStudentListStore = create<State & Action>()((set) => ({
@@ -29,6 +31,7 @@ export const useStudentListStore = create<State & Action>()((set) => ({
   searchTerm: "",
   isRollMode: false,
   rollStates: new Map(),
+  rollStateFilter: null,
 
   setSortBy: (sortBy) => set({ sortBy }),
   setSortOrder: (sortOrder) => set({ sortOrder }),
@@ -37,6 +40,7 @@ export const useStudentListStore = create<State & Action>()((set) => ({
   exitRollMode: () =>
     set((state) => {
       state.resetRollStates()
+      state.setRollStateFilter(null)
       return { isRollMode: false }
     }),
   setInitialRollStates: (studentIds) =>
@@ -60,4 +64,5 @@ export const useStudentListStore = create<State & Action>()((set) => ({
 
       return { rollStates }
     }),
+  setRollStateFilter: (rollStateFilter) => set({ rollStateFilter }),
 }))

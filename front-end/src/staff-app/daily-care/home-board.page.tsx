@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react"
 import styled from "styled-components"
 import Button from "@material-ui/core/ButtonBase"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Spacing, BorderRadius, FontWeight } from "shared/styles/styles"
+import { Spacing, BorderRadius, FontWeight, FontSize } from "shared/styles/styles"
 import { Colors } from "shared/styles/colors"
 import { CenteredContainer } from "shared/components/centered-container/centered-container.component"
 import { Person } from "shared/models/person"
@@ -11,9 +11,10 @@ import { StudentListTile } from "staff-app/components/student-list-tile/student-
 import { ActiveRollOverlay } from "staff-app/components/active-roll-overlay/active-roll-overlay.component"
 import { Toolbar } from "staff-app/components/toolbar/toolbar.component"
 import { useStudentListStore, SortBy, SortOrder } from "staff-app/stores/studentList.store"
+import { RolllStateType } from "shared/models/roll"
 
 export const HomeBoardPage: React.FC = () => {
-  const { sortBy, sortOrder, searchTerm, setInitialRollStates } = useStudentListStore()
+  const { sortBy, sortOrder, searchTerm, rollStates, rollStateFilter, setInitialRollStates } = useStudentListStore()
   const [getStudents, data, loadState] = useApi<{ students: Person[] }>({ url: "get-homeboard-students" })
 
   useEffect(() => {
@@ -28,14 +29,15 @@ export const HomeBoardPage: React.FC = () => {
   const studentsSorted = useMemo(() => {
     if (!data?.students) return
 
-    return (structuredClone(data.students) as Person[]).sort((a, b) => sortStudents(a, b, sortBy, sortOrder)).filter((s) => filterStudents(s, searchTerm))
-  }, [data?.students, sortBy, sortOrder, searchTerm])
+    return (structuredClone(data.students) as Person[])
+      .sort((a, b) => sortByName(a, b, sortBy, sortOrder))
+      .filter((s) => filterBySearchTerm(s, searchTerm))
+      .filter((s) => filterByRollState(rollStateFilter, rollStates.get(s.id)!))
+  }, [data?.students, sortBy, sortOrder, searchTerm, rollStateFilter])
 
   return (
     <>
       <S.PageContainer>
-        <Toolbar />
-
         {loadState === "loading" && (
           <CenteredContainer>
             <FontAwesomeIcon icon="spinner" size="2x" spin />
@@ -44,9 +46,11 @@ export const HomeBoardPage: React.FC = () => {
 
         {loadState === "loaded" && studentsSorted && (
           <>
-            {studentsSorted.map((s) => (
-              <StudentListTile key={s.id} student={s} />
-            ))}
+            <Toolbar />
+
+            {studentsSorted.length < 1 ? <S.NoRecordNotice>No Students found</S.NoRecordNotice> : studentsSorted.map((s) => <StudentListTile key={s.id} student={s} />)}
+
+            <ActiveRollOverlay />
           </>
         )}
 
@@ -56,7 +60,6 @@ export const HomeBoardPage: React.FC = () => {
           </CenteredContainer>
         )}
       </S.PageContainer>
-      <ActiveRollOverlay />
     </>
   )
 }
@@ -85,9 +88,16 @@ const S = {
       border-radius: ${BorderRadius.default};
     }
   `,
+  NoRecordNotice: styled.span`
+    text-align: center;
+    display: inline-block;
+    margin-top: ${Spacing.u10};
+    font-weight: ${FontWeight.strong};
+    font-size: ${FontSize.u3};
+  `,
 }
 
-const sortStudents = (a: Person, b: Person, sortBy: SortBy, sortOrder: SortOrder) => {
+const sortByName = (a: Person, b: Person, sortBy: SortBy, sortOrder: SortOrder) => {
   const nameA = a[sortBy].toUpperCase()
   const nameB = b[sortBy].toUpperCase()
 
@@ -101,4 +111,6 @@ const sortStudents = (a: Person, b: Person, sortBy: SortBy, sortOrder: SortOrder
   return sortOrder === "desc" ? comparison * -1 : comparison
 }
 
-const filterStudents = (s: Person, searchTerm: string) => `${s.first_name.toLowerCase()}${s.last_name.toLowerCase()}`.includes(searchTerm.replaceAll(" ", ""))
+const filterBySearchTerm = (s: Person, searchTerm: string) => `${s.first_name.toLowerCase()}${s.last_name.toLowerCase()}`.includes(searchTerm.replaceAll(" ", ""))
+
+const filterByRollState = (rollStateFilter: RolllStateType | null, studentRollState: RolllStateType) => (rollStateFilter ? rollStateFilter === studentRollState : true)
