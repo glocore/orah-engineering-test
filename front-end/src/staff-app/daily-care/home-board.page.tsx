@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import styled from "styled-components"
 import Button from "@material-ui/core/ButtonBase"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -9,20 +9,16 @@ import { Person } from "shared/models/person"
 import { useApi } from "shared/hooks/use-api"
 import { StudentListTile } from "staff-app/components/student-list-tile/student-list-tile.component"
 import { ActiveRollOverlay, ActiveRollAction } from "staff-app/components/active-roll-overlay/active-roll-overlay.component"
+import { Toolbar } from "staff-app/components/toolbar/toolbar.component"
+import { useToolbarStore, SortBy, SortOrder } from "staff-app/stores/toolbar.store"
 
 export const HomeBoardPage: React.FC = () => {
-  const [isRollMode, setIsRollMode] = useState(false)
+  const { sortBy, sortOrder, searchTerm, isRollMode, setIsRollMode } = useToolbarStore()
   const [getStudents, data, loadState] = useApi<{ students: Person[] }>({ url: "get-homeboard-students" })
 
   useEffect(() => {
     void getStudents()
   }, [getStudents])
-
-  const onToolbarAction = (action: ToolbarAction) => {
-    if (action === "roll") {
-      setIsRollMode(true)
-    }
-  }
 
   const onActiveRollAction = (action: ActiveRollAction) => {
     if (action === "exit") {
@@ -30,10 +26,16 @@ export const HomeBoardPage: React.FC = () => {
     }
   }
 
+  const studentsSorted = useMemo(() => {
+    if (!data?.students) return
+
+    return (structuredClone(data.students) as Person[]).sort((a, b) => sortStudents(a, b, sortBy, sortOrder)).filter((s) => filterStudents(s, searchTerm))
+  }, [data?.students, sortBy, sortOrder, searchTerm])
+
   return (
     <>
       <S.PageContainer>
-        <Toolbar onItemClick={onToolbarAction} />
+        <Toolbar />
 
         {loadState === "loading" && (
           <CenteredContainer>
@@ -41,9 +43,9 @@ export const HomeBoardPage: React.FC = () => {
           </CenteredContainer>
         )}
 
-        {loadState === "loaded" && data?.students && (
+        {loadState === "loaded" && studentsSorted && (
           <>
-            {data.students.map((s) => (
+            {studentsSorted.map((s) => (
               <StudentListTile key={s.id} isRollMode={isRollMode} student={s} />
             ))}
           </>
@@ -57,21 +59,6 @@ export const HomeBoardPage: React.FC = () => {
       </S.PageContainer>
       <ActiveRollOverlay isActive={isRollMode} onItemClick={onActiveRollAction} />
     </>
-  )
-}
-
-type ToolbarAction = "roll" | "sort"
-interface ToolbarProps {
-  onItemClick: (action: ToolbarAction, value?: string) => void
-}
-const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { onItemClick } = props
-  return (
-    <S.ToolbarContainer>
-      <div onClick={() => onItemClick("sort")}>First Name</div>
-      <div>Search</div>
-      <S.Button onClick={() => onItemClick("roll")}>Start Roll</S.Button>
-    </S.ToolbarContainer>
   )
 }
 
@@ -100,3 +87,19 @@ const S = {
     }
   `,
 }
+
+const sortStudents = (a: Person, b: Person, sortBy: SortBy, sortOrder: SortOrder) => {
+  const nameA = a[sortBy].toUpperCase()
+  const nameB = b[sortBy].toUpperCase()
+
+  let comparison = 0
+
+  if (nameA > nameB) {
+    comparison = 1
+  } else if (nameA < nameB) {
+    comparison = -1
+  }
+  return sortOrder === "desc" ? comparison * -1 : comparison
+}
+
+const filterStudents = (s: Person, searchTerm: string) => `${s.first_name.toLowerCase()}${s.last_name.toLowerCase()}`.includes(searchTerm.replaceAll(" ", ""))
