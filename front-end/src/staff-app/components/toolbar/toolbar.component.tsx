@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Button, IconButton, Typography } from "@material-ui/core"
 import React from "react"
-import { useToolbarStore } from "staff-app/stores/toolbar.store"
+import { useStudentListStore } from "staff-app/stores/studentList.store"
 import { Colors } from "shared/styles/colors"
 import { BorderRadius, FontWeight, Spacing } from "shared/styles/styles"
 import styled from "styled-components"
@@ -9,7 +9,7 @@ import styled from "styled-components"
 type ToolbarProps = {}
 
 export const Toolbar: React.FC<ToolbarProps> = () => {
-  const { sortBy, sortOrder, isRollMode, setSortOrder, setSortBy, setSearchTerm, setIsRollMode } = useToolbarStore()
+  const { sortBy, sortOrder, isRollMode, setSortOrder, setSortBy, setSearchTerm, enterRollMode, exitRollMode } = useStudentListStore()
 
   function handleSortByClick() {
     setSortBy(sortBy === "first_name" ? "last_name" : "first_name")
@@ -24,7 +24,7 @@ export const Toolbar: React.FC<ToolbarProps> = () => {
   }
 
   function handleRollButtonClick() {
-    setIsRollMode(!isRollMode)
+    isRollMode ? exitRollMode() : enterRollMode()
   }
 
   return (

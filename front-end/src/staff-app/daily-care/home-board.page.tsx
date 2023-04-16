@@ -8,23 +8,22 @@ import { CenteredContainer } from "shared/components/centered-container/centered
 import { Person } from "shared/models/person"
 import { useApi } from "shared/hooks/use-api"
 import { StudentListTile } from "staff-app/components/student-list-tile/student-list-tile.component"
-import { ActiveRollOverlay, ActiveRollAction } from "staff-app/components/active-roll-overlay/active-roll-overlay.component"
+import { ActiveRollOverlay } from "staff-app/components/active-roll-overlay/active-roll-overlay.component"
 import { Toolbar } from "staff-app/components/toolbar/toolbar.component"
-import { useToolbarStore, SortBy, SortOrder } from "staff-app/stores/toolbar.store"
+import { useStudentListStore, SortBy, SortOrder } from "staff-app/stores/studentList.store"
 
 export const HomeBoardPage: React.FC = () => {
-  const { sortBy, sortOrder, searchTerm, isRollMode, setIsRollMode } = useToolbarStore()
+  const { sortBy, sortOrder, searchTerm, setInitialRollStates } = useStudentListStore()
   const [getStudents, data, loadState] = useApi<{ students: Person[] }>({ url: "get-homeboard-students" })
 
   useEffect(() => {
     void getStudents()
   }, [getStudents])
 
-  const onActiveRollAction = (action: ActiveRollAction) => {
-    if (action === "exit") {
-      setIsRollMode(false)
-    }
-  }
+  useEffect(() => {
+    if (!data) return
+    setInitialRollStates(data.students.map((s) => s.id))
+  }, [data])
 
   const studentsSorted = useMemo(() => {
     if (!data?.students) return
@@ -46,7 +45,7 @@ export const HomeBoardPage: React.FC = () => {
         {loadState === "loaded" && studentsSorted && (
           <>
             {studentsSorted.map((s) => (
-              <StudentListTile key={s.id} isRollMode={isRollMode} student={s} />
+              <StudentListTile key={s.id} student={s} />
             ))}
           </>
         )}
@@ -57,7 +56,7 @@ export const HomeBoardPage: React.FC = () => {
           </CenteredContainer>
         )}
       </S.PageContainer>
-      <ActiveRollOverlay isActive={isRollMode} onItemClick={onActiveRollAction} />
+      <ActiveRollOverlay />
     </>
   )
 }
