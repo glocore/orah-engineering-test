@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import styled from "styled-components"
 import Button from "@material-ui/core/Button"
 import { BorderRadius, FontSize, Spacing } from "shared/styles/styles"
@@ -6,19 +6,18 @@ import { RollStateList } from "staff-app/components/roll-state/roll-state-list.c
 import { useStudentListStore } from "staff-app/stores/studentList.store"
 import { useApi } from "shared/hooks/use-api"
 import { RolllStateType } from "shared/models/roll"
-import { CircularProgress, Slide, Snackbar, makeStyles } from "@material-ui/core"
+import { CircularProgress, Slide, Snackbar, Typography, withStyles } from "@material-ui/core"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 export type ActiveRollAction = "filter" | "exit"
 interface Props {}
 
 export const ActiveRollOverlay: React.FC<Props> = () => {
-  const classes = useStyles()
-
   const isActive = useStudentListStore((state) => state.isRollMode)
   const exitRollMode = useStudentListStore((state) => state.exitRollMode)
   const rollStates = useStudentListStore((state) => state.rollStates)
 
-  const [snackbar, setSnackbar] = useState<string | null>(null)
+  const [snackbar, setSnackbar] = useState<{ type: "success" | "error"; message: string } | null>(null)
 
   const [saveRoll, , saveRollStatus] = useApi({ url: "save-roll", initialLoadState: "unloaded" })
 
@@ -31,14 +30,14 @@ export const ActiveRollOverlay: React.FC<Props> = () => {
 
   useEffect(() => {
     if (saveRollStatus === "error") {
-      setSnackbar("Something went wrong. Please try again.")
+      setSnackbar({ type: "error", message: "Something went wrong. Please try again." })
       return
     }
 
     if (saveRollStatus === "loaded") {
       exitRollMode()
       setTimeout(() => {
-        setSnackbar("Saved roll successfully.")
+        setSnackbar({ type: "success", message: "Saved roll successfully." })
       }, 100)
 
       return
@@ -67,17 +66,28 @@ export const ActiveRollOverlay: React.FC<Props> = () => {
               Exit
             </Button>
 
-            <div className={classes.wrapper}>
-              <Button color="inherit" className={classes.completeButton} onClick={handleCompletedClick} disabled={saveRollStatus === "loading"}>
+            <S.CompleteButtonWrapper>
+              <S.CompleteButton color="inherit" onClick={handleCompletedClick} disabled={saveRollStatus === "loading"}>
                 Complete
-              </Button>
-              {saveRollStatus === "loading" && <CircularProgress size={24} className={classes.buttonProgress} />}
-            </div>
+              </S.CompleteButton>
+              {saveRollStatus === "loading" && <S.CircularProgress size={24} color="inherit" />}
+            </S.CompleteButtonWrapper>
           </div>
         </div>
       </S.Content>
 
-      <Snackbar open={!!snackbar} onClose={() => setSnackbar(null)} TransitionComponent={Slide} message={snackbar} autoHideDuration={4000} />
+      <Snackbar
+        open={!!snackbar}
+        onClose={() => setTimeout(() => setSnackbar(null), 300)}
+        TransitionComponent={Slide}
+        message={
+          <S.SnackbarContent>
+            <FontAwesomeIcon icon={snackbar?.type === "error" ? "exclamation-circle" : "check-circle"} color={snackbar?.type === "error" ? "tomato" : "lightgreen"} />
+            <Typography>{snackbar?.message}</Typography>
+          </S.SnackbarContent>
+        }
+        autoHideDuration={4000}
+      />
     </S.Overlay>
   )
 }
@@ -103,25 +113,29 @@ const S = {
     border-radius: ${BorderRadius.default};
     padding: ${Spacing.u4};
   `,
-}
-
-const useStyles = makeStyles((theme) => ({
-  wrapper: {
-    position: "relative",
-    display: "inline-block",
-  },
-  completeButton: {
-    marginLeft: Spacing.u2,
-    "&:disabled": {
-      color: "gray",
+  CompleteButtonWrapper: styled.div`
+    position: relative;
+    display: inline-block;
+  `,
+  CompleteButton: withStyles({
+    root: {
+      marginLeft: Spacing.u2,
+      "&:disabled": {
+        color: "gray",
+      },
     },
-  },
-  buttonProgress: {
-    color: "white",
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-}))
+  })(Button),
+  CircularProgress: styled(CircularProgress)`
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -12px;
+    margin-left: -12px;
+  `,
+  SnackbarContent: styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${Spacing.u2};
+  `,
+}
