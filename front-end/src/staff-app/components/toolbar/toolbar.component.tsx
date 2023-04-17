@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Button, IconButton, Typography } from "@material-ui/core"
+import { Button, IconButton, InputAdornment, TextField, Typography, withStyles } from "@material-ui/core"
 import React from "react"
 import { useStudentListStore } from "staff-app/stores/studentList.store"
 import { Colors } from "shared/styles/colors"
@@ -38,7 +38,20 @@ export const Toolbar: React.FC<ToolbarProps> = () => {
           {sortOrder === "asc" ? <FontAwesomeIcon icon="arrow-down" size="sm" /> : <FontAwesomeIcon icon="arrow-up" size="sm" />}
         </S.SortButton>
       </div>
-      <S.TextField id="search" placeholder="Search" onChange={handleSearchChange} />
+      <S.TextField
+        onChange={handleSearchChange}
+        placeholder="Search"
+        variant="outlined"
+        size="small"
+        InputProps={{
+          style: { color: "#fff" },
+          startAdornment: (
+            <InputAdornment position="start">
+              <FontAwesomeIcon icon="search" size="sm" />
+            </InputAdornment>
+          ),
+        }}
+      />
       <S.Button onClick={handleRollButtonClick} style={{ width: 100 }}>
         {isRollMode ? "Cancel" : "Start Roll"}
       </S.Button>
@@ -75,17 +88,20 @@ const S = {
       padding: 10px;
     }
   `,
-  TextField: styled.input`
-    border: 1px solid white;
-    background-color: transparent;
-    padding: 7px 10px;
-    border-radius: 5px;
-    font-size: 16px;
-    outline: none;
-    color: #fff;
-
-    ::placeholder {
-      color: white;
-    }
-  `,
+  TextField: withStyles({
+    root: {
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": {
+          borderColor: "lightgray",
+          borderRadius: 5,
+        },
+        "&:hover fieldset": {
+          borderColor: "lightgray",
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: "white",
+        },
+      },
+    },
+  })(TextField),
 }
