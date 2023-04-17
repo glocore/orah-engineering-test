@@ -5,16 +5,16 @@ import { Images } from "assets/images"
 import { Colors } from "shared/styles/colors"
 import { Person, PersonHelper } from "shared/models/person"
 import { RollStateSwitcher } from "staff-app/components/roll-state/roll-state-switcher.component"
-import { useStudentListStore } from "staff-app/stores/studentList.store"
+import { useDailyCareStore } from "staff-app/stores/daily-care-store.store"
 import { RolllStateType } from "shared/models/roll"
 
 interface Props {
   student: Person
 }
 export const StudentListTile: React.FC<Props> = ({ student }) => {
-  const isRollMode = useStudentListStore((state) => state.isRollMode)
-  const rollState = useStudentListStore((state) => state.rollStates.get(student.id) ?? "unmark")
-  const handleRollStateChange = useStudentListStore((state) => (newRollState: RolllStateType) => state.updateRollStateFor(student.id, newRollState))
+  const isRollMode = useDailyCareStore((state) => state.isRollMode)
+  const rollState = useDailyCareStore((state) => state.rollStates.get(student.id) ?? "unmark")
+  const handleRollStateChange = useDailyCareStore((state) => (newRollState: RolllStateType) => state.updateRollStateFor(student.id, newRollState))
 
   return (
     <S.Container>

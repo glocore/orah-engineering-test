@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Button, IconButton, InputAdornment, TextField, Typography, withStyles } from "@material-ui/core"
 import React from "react"
-import { useStudentListStore } from "staff-app/stores/studentList.store"
+import { useDailyCareStore } from "staff-app/stores/daily-care-store.store"
 import { Colors } from "shared/styles/colors"
 import { BorderRadius, FontWeight, Spacing } from "shared/styles/styles"
 import styled from "styled-components"
@@ -9,7 +9,7 @@ import styled from "styled-components"
 type ToolbarProps = {}
 
 export const Toolbar: React.FC<ToolbarProps> = () => {
-  const { sortBy, sortOrder, isRollMode, setSortOrder, setSortBy, setSearchTerm, enterRollMode, exitRollMode } = useStudentListStore()
+  const { sortBy, sortOrder, isRollMode, setSortOrder, setSortBy, setSearchTerm, enterRollMode, exitRollMode } = useDailyCareStore()
 
   function handleSortByClick() {
     setSortBy(sortBy === "first_name" ? "last_name" : "first_name")
@@ -34,6 +34,7 @@ export const Toolbar: React.FC<ToolbarProps> = () => {
         <S.Button onClick={handleSortByClick} style={{ width: 110 }} title={`Sort by ${sortBy === "first_name" ? "first name" : "last name"}`}>
           {sortBy === "first_name" ? "First Name" : "Last Name"}
         </S.Button>
+
         <S.SortButton onClick={handleSortOrderClick} size="small" title={`Sort in ${sortOrder === "asc" ? "ascending" : "descending"} order`}>
           {sortOrder === "asc" ? <FontAwesomeIcon icon="arrow-down" size="sm" /> : <FontAwesomeIcon icon="arrow-up" size="sm" />}
         </S.SortButton>
@@ -76,18 +77,26 @@ const S = {
     font-weight: ${FontWeight.strong};
     border-radius: ${BorderRadius.default};
   `,
-  Button: styled(Button)`
-    && {
-      font-weight: ${FontWeight.strong};
-      color: #fff;
-    }
-  `,
-  SortButton: styled(IconButton)`
-    && {
-      color: #fff;
-      padding: 10px;
-    }
-  `,
+  Button: withStyles({
+    root: {
+      fontWeight: FontWeight.strong,
+      color: "#fff",
+
+      "&:hover": {
+        backgroundColor: "#ffffff22",
+      },
+    },
+  })(Button),
+  SortButton: withStyles({
+    root: {
+      color: "#fff",
+      padding: "10px",
+
+      "&:hover": {
+        backgroundColor: "#ffffff22",
+      },
+    },
+  })(IconButton),
   TextField: withStyles({
     root: {
       "& .MuiOutlinedInput-root": {

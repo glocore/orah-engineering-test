@@ -4,15 +4,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { RollStateIcon } from "staff-app/components/roll-state/roll-state-icon.component"
 import { Spacing, FontWeight } from "shared/styles/styles"
 import { RolllStateType } from "shared/models/roll"
-import { useStudentListStore } from "staff-app/stores/studentList.store"
+import { useDailyCareStore } from "staff-app/stores/daily-care-store.store"
 import { Button, ButtonProps } from "@material-ui/core"
 
 interface Props {
   stateList: StateList[]
 }
 export const RollStateList: React.FC<Props> = ({ stateList }) => {
-  const rollStateFilter = useStudentListStore((state) => state.rollStateFilter)
-  const setRollStateFilter = useStudentListStore((state) => state.setRollStateFilter)
+  const rollStateFilter = useDailyCareStore((state) => state.rollStateFilter)
+  const setRollStateFilter = useDailyCareStore((state) => state.setRollStateFilter)
 
   const onClick = (type: ItemType) => {
     setRollStateFilter(type === "all" ? null : type)

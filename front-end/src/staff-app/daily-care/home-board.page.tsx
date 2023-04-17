@@ -10,11 +10,11 @@ import { useApi } from "shared/hooks/use-api"
 import { StudentListTile } from "staff-app/components/student-list-tile/student-list-tile.component"
 import { ActiveRollOverlay } from "staff-app/components/active-roll-overlay/active-roll-overlay.component"
 import { Toolbar } from "staff-app/components/toolbar/toolbar.component"
-import { useStudentListStore, SortBy, SortOrder } from "staff-app/stores/studentList.store"
+import { useDailyCareStore, SortBy, SortOrder } from "staff-app/stores/daily-care-store.store"
 import { RolllStateType } from "shared/models/roll"
 
 export const HomeBoardPage: React.FC = () => {
-  const { sortBy, sortOrder, searchTerm, rollStates, rollStateFilter, setInitialRollStates } = useStudentListStore()
+  const { sortBy, sortOrder, searchTerm, rollStates, rollStateFilter, setInitialRollStates } = useDailyCareStore()
   const [getStudents, data, loadState] = useApi<{ students: Person[] }>({ url: "get-homeboard-students" })
 
   useEffect(() => {

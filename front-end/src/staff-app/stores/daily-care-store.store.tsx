@@ -25,7 +25,7 @@ type Action = {
   setRollStateFilter: (rollState: RolllStateType | null) => void
 }
 
-export const useStudentListStore = create<State & Action>()((set) => ({
+export const useDailyCareStore = create<State & Action>()((set) => ({
   sortBy: "first_name",
   sortOrder: "asc",
   searchTerm: "",

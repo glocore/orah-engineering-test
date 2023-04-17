@@ -3,7 +3,7 @@ import styled from "styled-components"
 import Button from "@material-ui/core/Button"
 import { BorderRadius, FontSize, Spacing } from "shared/styles/styles"
 import { RollStateList } from "staff-app/components/roll-state/roll-state-list.component"
-import { useStudentListStore } from "staff-app/stores/studentList.store"
+import { useDailyCareStore } from "staff-app/stores/daily-care-store.store"
 import { useApi } from "shared/hooks/use-api"
 import { RolllStateType } from "shared/models/roll"
 import { CircularProgress, Slide, Snackbar, Typography, withStyles } from "@material-ui/core"
@@ -13,9 +13,9 @@ export type ActiveRollAction = "filter" | "exit"
 interface Props {}
 
 export const ActiveRollOverlay: React.FC<Props> = () => {
-  const isActive = useStudentListStore((state) => state.isRollMode)
-  const exitRollMode = useStudentListStore((state) => state.exitRollMode)
-  const rollStates = useStudentListStore((state) => state.rollStates)
+  const isActive = useDailyCareStore((state) => state.isRollMode)
+  const exitRollMode = useDailyCareStore((state) => state.exitRollMode)
+  const rollStates = useDailyCareStore((state) => state.rollStates)
 
   const [snackbar, setSnackbar] = useState<{ type: "success" | "error"; message: string } | null>(null)
 
